@@ -1,0 +1,20 @@
+{
+    "name": "reflexions/content_export_import_csv",
+    "description": "Drupal module for exporting and importing content in CSV",
+    "homepage": "https://github.com/reflexions/drupal-content-export-import-csv",
+    "type": "drupal-module",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Goran Mitev",
+            "email": "gokimk@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.3.13"
+    },
+    "require-dev": {
+
+    },
+    "minimum-stability": "dev"
+}
