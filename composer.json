@@ -1,5 +1,5 @@
 {
-    "name": "reflexions/content_export_import_csv",
+    "name": "reflexions/content-export-import-csv",
     "description": "Drupal module for exporting and importing content in CSV",
     "homepage": "https://github.com/reflexions/drupal-content-export-import-csv",
     "type": "drupal-module",

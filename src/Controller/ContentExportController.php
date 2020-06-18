@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\content_export_csv\Controller;
+namespace Drupal\content_export_import_csv\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -53,17 +53,17 @@ class ContentExportController extends ControllerBase
         $nodeArticleFields = \Drupal::entityManager()->getFieldDefinitions('node', $nodeType);
         $nodeFields = array_keys($nodeArticleFields);
         $unwantedFields = array(
-      'comment',
-      'sticky',
-      'revision_default',
-      'revision_translation_affected',
-      //'revision_timestamp',
-      //'revision_uid',
-      'revision_log',
-      'vid',
-      //'uuid',
-      'promote',
-    );
+          'comment',
+          'sticky',
+          'revision_default',
+          'revision_translation_affected',
+          //'revision_timestamp',
+          //'revision_uid',
+          'revision_log',
+          'vid',
+          //'uuid',
+          'promote',
+        );
 
         foreach ($unwantedFields as $unwantedField) {
             $unwantedFieldKey = array_search($unwantedField, $nodeFields);
