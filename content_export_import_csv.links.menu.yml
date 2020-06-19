@@ -3,3 +3,9 @@ content_export_import_csv.export:
   description: 'Content of any type can be exported using this module.'
   route_name: content_export_import_csv.data-export
   parent: system.admin_config_services
+
+content_export_import_csv.import:
+  title: Content import
+  description: 'Content of any type can be imported using this module.'
+  route_name: content_export_import_csv.data-import
+  parent: system.admin_config_services
