@@ -5,3 +5,10 @@ content_export_import_csv.data-export:
   requirements:
     _permission: 'administer site configuration'
 
+content_export_import_csv.data-import:
+  path: '/admin/config/services/content-import'
+  defaults:
+    _form: '\Drupal\content_export_import_csv\Form\ContentImportForm'
+  requirements:
+    _permission: 'administer site configuration'
+
