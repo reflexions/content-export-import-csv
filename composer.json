@@ -1,7 +1,7 @@
 {
     "name": "reflexions/content-export-import-csv",
     "description": "Drupal module for exporting and importing content in CSV",
-    "homepage": "https://github.com/reflexions/drupal-content-export-import-csv",
+    "homepage": "https://github.com/reflexions/content-export-import-csv",
     "type": "drupal-module",
     "license": "GPL",
     "authors": [
