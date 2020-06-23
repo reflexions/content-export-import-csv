@@ -40,7 +40,7 @@ class ContentExportController extends ControllerBase
     {
         $nodeData = Node::loadMultiple($entityIds);
         foreach ($nodeData as $nodeDataEach) {
-            $nodeCsvData[] = self::getNodeData($nodeDataEach, $nodeType);
+            $nodeCsvData[] = $this->getNodeData($nodeDataEach, $nodeType);
         }
         return $nodeCsvData;
     }
@@ -61,8 +61,10 @@ class ContentExportController extends ControllerBase
           //'revision_uid',
           'revision_log',
           'vid',
-          //'uuid',
+          'uid',
           'promote',
+          'publish_on',
+          'path'
         );
 
         foreach ($unwantedFields as $unwantedField) {
@@ -78,16 +80,16 @@ class ContentExportController extends ControllerBase
     public function getNodeData($nodeObject, $nodeType)
     {
         $nodeData = array();
-        $nodeFields = self::getValidFieldList($nodeType);
+        $nodeFields = $this->getValidFieldList($nodeType);
         foreach ($nodeFields as $nodeField) {
             $fieldData = $nodeObject->{$nodeField};
             $csvValue = isset($fieldData->value)
-        ? $fieldData->value
-        : (
+            ? $fieldData->value
+            : (
             isset($fieldData->target_id)
-          ? $fieldData->target_id
-          : $fieldData->langcode
-        );
+            ? $fieldData->target_id
+            : $fieldData->langcode
+            );
             $nodeData[] = $csvValue;
         }
         return $nodeData;
@@ -98,8 +100,8 @@ class ContentExportController extends ControllerBase
      */
     public function getNodeCsvData($nodeType)
     {
-        $entityIds = self::getNodeIds($nodeType);
-        $nodeData = self::getNodeDataList($entityIds, $nodeType);
+        $entityIds = $this->getNodeIds($nodeType);
+        $nodeData = $this->getNodeDataList($entityIds, $nodeType);
 
         return $nodeData;
     }

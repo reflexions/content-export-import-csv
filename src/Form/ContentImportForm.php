@@ -124,32 +124,57 @@ class ContentImportForm extends FormBase
 
     private function readFields($data)
     {
-        $this->fields = array_flip($data);
+        // $this->fields = array_flip($data);
+        $this->fields = $data;
     }
 
     private function importEntity(array $data = [])
     {
-        $uuid = $data[$this->fields['uuid']];
-        $type = $data[$this->fields['type']];
-        $title = $data[$this->fields['title']];
+        $uuid = $data[array_search('uuid', $this->fields)];
+        $langcode = $data[array_search('langcode', $this->fields)];
+        $data = array_combine($this->fields, $data);
 
-        $node = \Drupal::entityTypeManager()
+        $nodes = \Drupal::entityTypeManager()
             ->getStorage('node')
-            ->loadByProperties(['uuid' => $uuid]);
+            ->loadByProperties([
+                'uuid' => $uuid,
+            ]);
 
-        $node->set('title', $title);
-        $node->save();
+        $node = ($nodes) ? reset($nodes) : null;
 
-        // Create node object with attached file.
-        $node = Node::create([
-            'type' => $type,
-            'title' => $title,
-            // 'field_image' => [
-            //     'target_id' => $file->id(),
-            //     'alt' => 'Hello world',
-            //     'title' => 'Goodbye world'
-            // ],
-        ]);
-        $node->save();
+
+        if ($node !== null && !$node->hasTranslation($langcode)) {
+            // add translation
+            $node->addTranslation($langcode, $data);
+            $node->save();
+            // if ($node->hasTranslation($langcode)) {
+            //     
+            //     // $node->removeTranslation($langcode);
+            //     $node->addTranslation($langcode, $data);
+            // }
+
+            // $nodes[0]->set('title', $title);
+            // $node->save();
+        } else {
+            // Create node object with attached file.
+            // $combined = array_combine($this->fields, $data);
+            // $node = Node::create($combined);
+            // $node = Node::create([
+            //     'type' => $type,
+            //     'title' => $title,
+            //     // 'field_image' => [
+            //     //     'target_id' => $file->id(),
+            //     //     'alt' => 'Hello world',
+            //     //     'title' => 'Goodbye world'
+            //     // ],
+            // ]);
+            // $node->save();
+        }
+
+        
+
+        
+
+        
     }
 }
