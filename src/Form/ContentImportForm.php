@@ -79,7 +79,7 @@ class ContentImportForm extends FormBase
 
         $row = 0;
 
-        while (($data = fgetcsv($handle, 10000, ",")) !== false) {
+        while (($data = fgetcsv($handle)) !== false) {
             $row++;
             if ($row === 1) {
                 $this->readFields($data);
