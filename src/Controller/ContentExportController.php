@@ -57,13 +57,21 @@ class ContentExportController extends ControllerBase
           'sticky',
           'revision_default',
           'revision_translation_affected',
-          //'revision_timestamp',
-          //'revision_uid',
+          'revision_timestamp',
+          'revision_uid',
           'revision_log',
+          'status',
+          'created',
+          'changed',
+          'default_langcode',
           'vid',
           'uid',
           'promote',
           'publish_on',
+          'unpublish_on',
+          'menu_link',
+          'content_translation_source',
+          'content_translation_outdated',
           'path'
         );
 

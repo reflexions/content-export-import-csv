@@ -6,6 +6,10 @@
     "license": "GPL",
     "authors": [
         {
+            "name": "Greg Martyn",
+            "email": "gokimk@gmail.com"
+        },
+        {
             "name": "Goran Mitev",
             "email": "gokimk@gmail.com"
         }
