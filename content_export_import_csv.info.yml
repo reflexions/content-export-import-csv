@@ -4,3 +4,4 @@ type: module
 version: '8.x-1.0'
 core: '8.x'
 configure: content_export_import_csv.data-export
+core_version_requirement: ^8 || ^9
