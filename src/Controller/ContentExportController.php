@@ -4,7 +4,7 @@ namespace Drupal\content_export_import_csv\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use \Drupal\node\Entity\Node;
+use Drupal\node\Entity\Node;
 
 class ContentExportController extends ControllerBase
 {
@@ -13,7 +13,7 @@ class ContentExportController extends ControllerBase
      */
     public function getContentType()
     {
-        $contentTypes = \Drupal::service('entity.manager')->getStorage('node_type')->loadMultiple();
+        $contentTypes = \Drupal::service('entity_type.manager')->getStorage('node_type')->loadMultiple();
         $contentTypesList = [];
         foreach ($contentTypes as $contentType) {
             $contentTypesList[$contentType->id()] = $contentType->label();
@@ -50,7 +50,7 @@ class ContentExportController extends ControllerBase
      */
     public function getValidFieldList($nodeType)
     {
-        $nodeArticleFields = \Drupal::entityManager()->getFieldDefinitions('node', $nodeType);
+        $nodeArticleFields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', $nodeType);
         $nodeFields = array_keys($nodeArticleFields);
         $unwantedFields = array(
           'comment',
