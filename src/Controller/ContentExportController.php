@@ -13,7 +13,9 @@ class ContentExportController extends ControllerBase
      */
     public function getContentType()
     {
-        $contentTypes = \Drupal::service('entity_type.manager')->getStorage('node_type')->loadMultiple();
+        $contentTypes = \Drupal::service('entity.manager')
+            ->getStorage('node_type')
+            ->loadMultiple();
         $contentTypesList = [];
         foreach ($contentTypes as $contentType) {
             $contentTypesList[$contentType->id()] = $contentType->label();
@@ -26,9 +28,10 @@ class ContentExportController extends ControllerBase
      */
     public function getNodeIds($nodeType)
     {
-        $entityQuery = \Drupal::entityQuery('node');
-        $entityQuery->condition('status', 1);
-        $entityQuery->condition('type', $nodeType);
+        $entityQuery = \Drupal::entityQuery('node')
+            ->condition('status', 1)
+            ->condition('type', $nodeType)
+            ->accessCheck(true);
         $entityIds = $entityQuery->execute();
         return $entityIds;
     }
