@@ -8,12 +8,22 @@ use Drupal\node\Entity\Node;
 
 class ContentExportController extends ControllerBase
 {
+    const allContentKey = 'all';
+
+    public static $timestampFields = [
+        'revision_timestamp',
+        'created',
+        'changed', // updated?
+        'publish_on',
+        'unpublish_on',
+    ];
+
     /**
      * Get Content Type List
      */
-    public function getContentType()
+    public static function getContentTypes()
     {
-        $contentTypes = \Drupal::service('entity.manager')
+        $contentTypes = \Drupal::service('entity_type.manager')
             ->getStorage('node_type')
             ->loadMultiple();
         $contentTypesList = [];
@@ -24,14 +34,24 @@ class ContentExportController extends ControllerBase
     }
 
     /**
+     * Get Content Type List including special value 'all'
+     */
+    public function getContentTypeOptions()
+    {
+        $contentTypesList = [self::allContentKey => 'All'] + self::getContentTypes();
+        return $contentTypesList;
+    }
+
+    /**
      * Gets NodesIds based on Node Type
      */
-    public function getNodeIds($nodeType)
+    public function getNodeIds($nodeType, bool $english_only)
     {
         $entityQuery = \Drupal::entityQuery('node')
-            ->condition('status', 1)
-            ->condition('type', $nodeType)
+            ->condition('status', 1, null, $english_only ? 'en' : null)
+            ->condition('type', $nodeType, null, $english_only ? 'en' : null)
             ->accessCheck(true);
+
         $entityIds = $entityQuery->execute();
         return $entityIds;
     }
@@ -39,80 +59,104 @@ class ContentExportController extends ControllerBase
     /**
      * Collects Node Data
      */
-    public function getNodeDataList($entityIds, $nodeType)
+    public function getNodeDataList($entityIds, $nodeType, bool $english_only)
     {
         $nodeData = Node::loadMultiple($entityIds);
-        foreach ($nodeData as $nodeDataEach) {
-            $nodeCsvData[] = $this->getNodeData($nodeDataEach, $nodeType);
-        }
+        $nodeCsvData = array_map(
+            function($value) use ($nodeType, $english_only) {
+                return $this->getNodeData($value, $nodeType, $english_only);
+            },
+            $nodeData
+        );
         return $nodeCsvData;
     }
 
-    /**
-     * Gets Valid Field List
-     */
-    public function getValidFieldList($nodeType)
+    public static function getExportableFieldList($nodeType)
     {
-        $nodeArticleFields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', $nodeType);
-        $nodeFields = array_keys($nodeArticleFields);
+        $nodeFieldDefinitions = \Drupal::service('entity_field.manager')
+            ->getFieldDefinitions('node', $nodeType);
+        $nodeFields = array_keys($nodeFieldDefinitions);
         $unwantedFields = array(
           'comment',
           'sticky',
           'revision_default',
           'revision_translation_affected',
-          'revision_timestamp',
-          'revision_uid',
+//          'revision_timestamp',
+//          'revision_uid',
           'revision_log',
           'status',
-          'created',
-          'changed',
+//          'created',
+//          'changed',
           'default_langcode',
           'vid',
           'uid',
           'promote',
-          'publish_on',
-          'unpublish_on',
+//          'publish_on',
+//          'unpublish_on',
           'menu_link',
           'content_translation_source',
           'content_translation_outdated',
-          'path'
+//          'path'
         );
 
-        foreach ($unwantedFields as $unwantedField) {
-            $unwantedFieldKey = array_search($unwantedField, $nodeFields);
-            unset($nodeFields[$unwantedFieldKey]);
-        }
-        return $nodeFields;
+        $wantedFields = array_diff($nodeFields, $unwantedFields);
+
+        return $wantedFields;
+    }
+
+    public static function getImportableFieldList($nodeType)
+    {
+        $exportableFields = self::getExportableFieldList($nodeType);
+        $unwantedFields = [
+            'nid',
+            'uuid',
+            'changed',
+            'type',
+            'path',
+            'revision_timestamp',
+            'revision_uid',
+        ];
+
+        $wantedFields = array_diff($exportableFields, $unwantedFields);
+
+        return $wantedFields;
     }
 
     /**
      * Gets Manipulated Node Data
      */
-    public function getNodeData($nodeObject, $nodeType)
+    public function getNodeData($nodeObject, $nodeType, bool $english_only)
     {
-        $nodeData = array();
-        $nodeFields = $this->getValidFieldList($nodeType);
-        foreach ($nodeFields as $nodeField) {
-            $fieldData = $nodeObject->{$nodeField};
-            $csvValue = isset($fieldData->value)
-            ? $fieldData->value
-            : (
-            isset($fieldData->target_id)
-            ? $fieldData->target_id
-            : $fieldData->langcode
-            );
-            $nodeData[] = $csvValue;
-        }
+        $nodeFields = self::getExportableFieldList($nodeType);
+
+        $nodeData = array_reduce(
+            $nodeFields,
+            function($carry, $nodeField) use ($nodeObject) {
+                $fieldData = $nodeObject->{$nodeField};
+                $csvValue = $fieldData->value
+                    //?? $fieldData->target_id
+                    ;
+
+                if (in_array($nodeField, self::$timestampFields)) {
+                    $csvValue = date('c', $csvValue);
+                }
+
+                $carry[ $nodeField ] = $csvValue;
+                return $carry;
+            },
+            []
+        );
+
         return $nodeData;
     }
 
     /**
      * Get Node Data in CSV Format
      */
-    public function getNodeCsvData($nodeType)
+    public function getNodeCsvData($nodeType, bool $english_only)
     {
-        $entityIds = $this->getNodeIds($nodeType);
-        $nodeData = $this->getNodeDataList($entityIds, $nodeType);
+        $entityIds = $this->getNodeIds($nodeType, $english_only);
+        $nodeData = $this->getNodeDataList($entityIds, $nodeType, $english_only);
 
         return $nodeData;
     }
