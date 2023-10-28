@@ -125,7 +125,7 @@ class ContentExportController extends ControllerBase
     /**
      * Gets Manipulated Node Data
      */
-    public function getNodeData($nodeObject, $nodeType, bool $english_only)
+    public function getNodeData(Node $nodeObject, $nodeType, bool $english_only)
     {
         $nodeFields = self::getExportableFieldList($nodeType);
 
@@ -133,12 +133,21 @@ class ContentExportController extends ControllerBase
             $nodeFields,
             function($carry, $nodeField) use ($nodeObject) {
                 $fieldData = $nodeObject->{$nodeField};
-                $csvValue = $fieldData->value
+                $csvValue = $nodeField === 'type'
+                    ? $nodeObject->getType()
+                    : (
+                        $nodeField === 'revision_uid'
+                            ? $nodeObject->getRevisionUserId()
+                            : $fieldData->value
                     //?? $fieldData->target_id
-                    ;
+                    );
 
                 if (in_array($nodeField, self::$timestampFields)) {
-                    $csvValue = date('c', $csvValue);
+                    // unpublish_on can be 0 if not scheduled
+                    // don't try to turn that into a date
+                    $csvValue = $csvValue
+                        ? date('c', $csvValue)
+                        : '';
                 }
 
                 $carry[ $nodeField ] = $csvValue;
