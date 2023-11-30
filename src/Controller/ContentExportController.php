@@ -6,7 +6,6 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\node\Entity\Node;
 
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 class ContentExportController extends ControllerBase
@@ -50,15 +49,17 @@ class ContentExportController extends ControllerBase
      */
     public function getNodeIds($nodeType, bool $english_only, $start_date)
     {
-        $date = new DrupalDateTime($start_date);
-        $date->setTimezone(new \DateTimezone(DateTimeItemInterface::STORAGE_TIMEZONE));
-        $timestamp = $date->getTimestamp();
 
         $entityQuery = \Drupal::entityQuery('node')
             ->condition('status', 1, null, $english_only ? 'en' : null)
             ->condition('type', $nodeType, null, $english_only ? 'en' : null)
-            ->condition('changed', $timestamp, '>')
             ->accessCheck(true);
+
+        if(!is_null($start_date)){
+            $date = new \DateTimeImmutable($start_date, new \DateTimezone(DateTimeItemInterface::STORAGE_TIMEZONE));
+            $timestamp = $date->getTimestamp();
+            $entityQuery->condition('changed', $timestamp, '>');
+        }
 
         $entityIds = $entityQuery->execute();
         return $entityIds;
