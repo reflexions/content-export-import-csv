@@ -6,6 +6,9 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\node\Entity\Node;
 
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+
 class ContentExportController extends ControllerBase
 {
     const allContentKey = 'all';
@@ -45,11 +48,16 @@ class ContentExportController extends ControllerBase
     /**
      * Gets NodesIds based on Node Type
      */
-    public function getNodeIds($nodeType, bool $english_only)
+    public function getNodeIds($nodeType, bool $english_only, $start_date)
     {
+        $date = new DrupalDateTime($start_date);
+        $date->setTimezone(new \DateTimezone(DateTimeItemInterface::STORAGE_TIMEZONE));
+        $timestamp = $date->getTimestamp();
+
         $entityQuery = \Drupal::entityQuery('node')
             ->condition('status', 1, null, $english_only ? 'en' : null)
             ->condition('type', $nodeType, null, $english_only ? 'en' : null)
+            ->condition('changed', $timestamp, '>')
             ->accessCheck(true);
 
         $entityIds = $entityQuery->execute();
@@ -162,9 +170,9 @@ class ContentExportController extends ControllerBase
     /**
      * Get Node Data in CSV Format
      */
-    public function getNodeCsvData($nodeType, bool $english_only)
+    public function getNodeCsvData($nodeType, bool $english_only, $start_date)
     {
-        $entityIds = $this->getNodeIds($nodeType, $english_only);
+        $entityIds = $this->getNodeIds($nodeType, $english_only, $start_date);
         $nodeData = $this->getNodeDataList($entityIds, $nodeType, $english_only);
 
         return $nodeData;
