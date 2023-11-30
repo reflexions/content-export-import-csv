@@ -68,6 +68,7 @@ class ContentExportForm extends FormBase
         $export_object = new ContentExportController;
         $submittedNodeType = $form_state->getValue('content_type_list');
         $english_only = $form_state->getValue('english_only') === 1;
+        $start_date = $form_state->getValue('start_date');
 
         $private_path = PrivateStream::basepath();
         $public_path = PublicStream::basepath();
@@ -90,7 +91,7 @@ class ContentExportForm extends FormBase
         fputcsv($csvFile, $columns);
 
         foreach ($nodeTypes as $nodeType) {
-            $csvData = $export_object->getNodeCsvData($nodeType, $english_only);
+            $csvData = $export_object->getNodeCsvData($nodeType, $english_only, $start_date);
             foreach ($csvData as $csvDataRow) {
                 $blankRow = array_fill_keys($columns, null);
                 $rowCells = array_merge($blankRow, $csvDataRow);
